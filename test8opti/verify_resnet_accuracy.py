@@ -1,6 +1,6 @@
 # =============================================================================
 # verify_resnet_accuracy.py — Real ResNet-50 layer accuracy validation for the
-# 8-bit triple-packed Posit DLA hardware with 1x64 BFP Exponent Scaling.
+# 8-bit triple-packed Posit DLA hardware with 1x64 Vector BFP Exponent Scaling.
 # =============================================================================
 import os
 import argparse
@@ -150,18 +150,31 @@ def pad_to_tiles(mat, rows, cols):
     return out, r_out, c_out
 
 # -----------------------------------------------------------------------------
-# 3. Block-Wise Exponent Scaling Helper (1x64 Vector Block)
+# 3. True 1x64 Vector Block-Wise Exponent Scaling Helper
 # -----------------------------------------------------------------------------
-def scale_tile_block(tile_mat):
-    flat = [v for row in tile_mat for v in row]
-    max_val = max(abs(x) for x in flat) if flat else 1.0
-    if max_val == 0:
-        exp = 0
-    else:
-        exp = math.floor(math.log2(max_val))
-    scale = 2.0 ** (-exp)
-    scaled_tile = [[val * scale for val in row] for row in tile_mat]
-    return scaled_tile, scale
+def bfp_scale_matrix(matrix, block_size=64):
+    M, K = len(matrix), len(matrix[0])
+    flat = [v for r in matrix for v in r]
+    scaled_flat = []
+    scale_factors = []
+    
+    for start in range(0, len(flat), block_size):
+        end = min(start + block_size, len(flat))
+        sub = flat[start:end]
+        max_val = max(abs(x) for x in sub)
+        if max_val == 0:
+            exp = 0
+        else:
+            exp = math.floor(math.log2(max_val))
+        scale = 2.0 ** (-exp)
+        scale_factors.append(scale)
+        for i in range(start, end):
+            val = flat[i] * scale
+            val = max(-4.0, min(4.0, val))
+            scaled_flat.append(val)
+
+    scaled_matrix = [scaled_flat[i*K : (i+1)*K] for i in range(M)]
+    return scaled_matrix, scale_factors
 
 # -----------------------------------------------------------------------------
 # 4. Hardware Tile Execution via iverilog / vvp
@@ -216,7 +229,7 @@ def run_hw_tile(a_tiles_3, b_tiles_3):
     return read_matrix_tile_file("dla_output_c.txt")
 
 # -----------------------------------------------------------------------------
-# 5. Full tiled GEMM with Block-Wise Dynamic Exponent Scale Calibration
+# 5. Full tiled GEMM with True 1x64 Vector Block-Wise Dynamic Exponent Scaling
 # -----------------------------------------------------------------------------
 def tiled_gemm_hw(matrix_a, matrix_b, M, K, N, use_relu=True):
     a_pad, M_pad, K_pad = pad_to_tiles(matrix_a, M, K)
@@ -233,16 +246,16 @@ def tiled_gemm_hw(matrix_a, matrix_b, M, K, N, use_relu=True):
                 a_tile = [row[kt*TILE:(kt+1)*TILE] for row in a_pad[mt*TILE:(mt+1)*TILE]]
                 b_tile = [row[nt*TILE:(nt+1)*TILE] for row in b_pad[kt*TILE:(kt+1)*TILE]]
                 
-                # Apply per-tile BFP exponent scaling
-                a_scaled, a_s = scale_tile_block(a_tile)
-                b_scaled, b_s = scale_tile_block(b_tile)
-                tile_scale = a_s * b_s
+                # Apply true 1x64 vector BFP exponent scaling
+                a_scaled, a_scales = bfp_scale_matrix(a_tile, 64)
+                b_scaled, b_scales = bfp_scale_matrix(b_tile, 64)
 
                 out3 = run_hw_tile([a_scaled]*3, [b_scaled]*3)  # same tile in all 3 lanes
                 hw_tile = out3[0]
                 
                 for i in range(TILE):
                     for j in range(TILE):
+                        tile_scale = a_scales[i] * b_scales[j]
                         acc[i][j] += (hw_tile[i][j] / tile_scale) if tile_scale > 0 else hw_tile[i][j]
                         
             for i in range(TILE):
