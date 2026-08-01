@@ -1,0 +1,351 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+--------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version      : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
+| Date              : Tue Jul 28 05:51:57 2026
+| Host              : LAPTOP-MHFLAL5K running 64-bit major release  (build 9200)
+| Command           : report_timing_summary -file timing_synth_report.rpt
+| Design            : strassen_top
+| Device            : xczu5ev-sfvc784
+| Speed File        : -3  PRODUCTION 1.30 05-15-2022
+| Design State      : Synthesized
+| Temperature Grade : E
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Summary Report
+
+------------------------------------------------------------------------------------------------
+| Timer Settings
+| --------------
+------------------------------------------------------------------------------------------------
+
+  Enable Multi Corner Analysis               :  Yes
+  Enable Pessimism Removal                   :  Yes
+  Pessimism Removal Resolution               :  Nearest Common Node
+  Enable Input Delay Default Clock           :  No
+  Enable Preset / Clear Arcs                 :  No
+  Disable Flight Delays                      :  No
+  Ignore I/O Paths                           :  No
+  Timing Early Launch at Borrowing Latches   :  No
+  Borrow Time for Max Delay Exceptions       :  Yes
+  Merge Timing Exceptions                    :  Yes
+  Inter-SLR Compensation                     :  Conservative
+
+  Corner  Analyze    Analyze    
+  Name    Max Paths  Min Paths  
+  ------  ---------  ---------  
+  Slow    Yes        Yes        
+  Fast    Yes        Yes        
+
+
+------------------------------------------------------------------------------------------------
+| Report Methodology
+| ------------------
+------------------------------------------------------------------------------------------------
+
+No report available as report_methodology has not been run prior. Run report_methodology on the current design for the summary of methodology violations.
+
+
+
+check_timing report
+
+Table of Contents
+-----------------
+1. checking no_clock (0)
+2. checking constant_clock (0)
+3. checking pulse_width_clock (0)
+4. checking unconstrained_internal_endpoints (0)
+5. checking no_input_delay (0)
+6. checking no_output_delay (0)
+7. checking multiple_clock (0)
+8. checking generated_clocks (0)
+9. checking loops (0)
+10. checking partial_input_delay (0)
+11. checking partial_output_delay (0)
+12. checking latch_loops (0)
+
+1. checking no_clock (0)
+------------------------
+ There are 0 register/latch pins with no clock.
+
+
+2. checking constant_clock (0)
+------------------------------
+ There are 0 register/latch pins with constant_clock.
+
+
+3. checking pulse_width_clock (0)
+---------------------------------
+ There are 0 register/latch pins which need pulse_width check
+
+
+4. checking unconstrained_internal_endpoints (0)
+------------------------------------------------
+ There are 0 pins that are not constrained for maximum delay.
+
+ There are 0 pins that are not constrained for maximum delay due to constant clock.
+
+
+5. checking no_input_delay (0)
+------------------------------
+ There are 0 input ports with no input delay specified.
+
+ There are 0 input ports with no input delay but user has a false path constraint.
+
+
+6. checking no_output_delay (0)
+-------------------------------
+ There are 0 ports with no output delay specified.
+
+ There are 0 ports with no output delay but user has a false path constraint
+
+ There are 0 ports with no output delay but with a timing clock defined on it or propagating through it
+
+
+7. checking multiple_clock (0)
+------------------------------
+ There are 0 register/latch pins with multiple clocks.
+
+
+8. checking generated_clocks (0)
+--------------------------------
+ There are 0 generated clocks that are not connected to a clock source.
+
+
+9. checking loops (0)
+---------------------
+ There are 0 combinational loops in the design.
+
+
+10. checking partial_input_delay (0)
+------------------------------------
+ There are 0 input ports with partial input delay specified.
+
+
+11. checking partial_output_delay (0)
+-------------------------------------
+ There are 0 ports with partial output delay specified.
+
+
+12. checking latch_loops (0)
+----------------------------
+ There are 0 combinational latch loops in the design through latch input
+
+
+
+------------------------------------------------------------------------------------------------
+| Design Timing Summary
+| ---------------------
+------------------------------------------------------------------------------------------------
+
+    WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
+    -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
+      1.263        0.000                      0               206878        0.061        0.000                      0               206878        2.032        0.000                       0                145005  
+
+
+All user specified timing constraints are met.
+
+
+------------------------------------------------------------------------------------------------
+| Clock Summary
+| -------------
+------------------------------------------------------------------------------------------------
+
+Clock  Waveform(ns)         Period(ns)      Frequency(MHz)
+-----  ------------         ----------      --------------
+clk    {0.000 2.500}        5.000           200.000         
+
+
+------------------------------------------------------------------------------------------------
+| Intra Clock Table
+| -----------------
+------------------------------------------------------------------------------------------------
+
+Clock             WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
+-----             -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
+clk                 1.263        0.000                      0               206878        0.061        0.000                      0               206878        2.032        0.000                       0                145005  
+
+
+------------------------------------------------------------------------------------------------
+| Inter Clock Table
+| -----------------
+------------------------------------------------------------------------------------------------
+
+From Clock    To Clock          WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints  
+----------    --------          -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------  
+
+
+------------------------------------------------------------------------------------------------
+| Other Path Groups Table
+| -----------------------
+------------------------------------------------------------------------------------------------
+
+Path Group    From Clock    To Clock          WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints  
+----------    ----------    --------          -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------  
+
+
+------------------------------------------------------------------------------------------------
+| Timing Details
+| --------------
+------------------------------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------------------------------
+From Clock:  clk
+  To Clock:  clk
+
+Setup :            0  Failing Endpoints,  Worst Slack        1.263ns,  Total Violation        0.000ns
+Hold  :            0  Failing Endpoints,  Worst Slack        0.061ns,  Total Violation        0.000ns
+PW    :            0  Failing Endpoints,  Worst Slack        2.032ns,  Total Violation        0.000ns
+---------------------------------------------------------------------------------------------------
+
+
+Max Delay Paths
+--------------------------------------------------------------------------------------
+Slack (MET) :             1.263ns  (required time - arrival time)
+  Source:                 mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/act_reg_reg[13]/C
+                            (rising edge-triggered cell FDCE clocked by clk  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3_reg[9]/D
+                            (rising edge-triggered cell FDCE clocked by clk  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk rise@5.000ns - clk rise@0.000ns)
+  Data Path Delay:        3.718ns  (logic 2.039ns (54.841%)  route 1.679ns (45.159%))
+  Logic Levels:           16  (CARRY8=2 DSP_A_B_DATA=1 DSP_ALU=1 DSP_M_DATA=1 DSP_MULTIPLIER=1 DSP_OUTPUT=1 DSP_PREADD_DATA=1 LUT4=1 LUT5=2 LUT6=5)
+  Clock Path Skew:        -0.007ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    0.017ns = ( 5.017 - 5.000 ) 
+    Source Clock Delay      (SCD):    0.024ns
+    Clock Pessimism Removal (CPR):    0.000ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk rise edge)        0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=145004, unset)       0.024     0.024    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/clk
+                         FDCE                                         r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/act_reg_reg[13]/C
+  -------------------------------------------------------------------    -------------------
+                         FDCE (Prop_FDCE_C_Q)         0.069     0.093 f  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/act_reg_reg[13]/Q
+                         net (fo=14, unplaced)        0.205     0.298    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/DSP48E2_inst/B[6]
+                         DSP_A_B_DATA (Prop_DSP_A_B_DATA_B[6]_B2_DATA[6])
+                                                      0.117     0.415 r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/DSP48E2_inst/DSP_A_B_DATA_INST/B2_DATA[6]
+                         net (fo=1, unplaced)         0.000     0.415    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/DSP48E2_inst/DSP_A_B_DATA.B2_DATA<6>
+                         DSP_PREADD_DATA (Prop_DSP_PREADD_DATA_B2_DATA[6]_B2B1[6])
+                                                      0.061     0.476 r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/DSP48E2_inst/DSP_PREADD_DATA_INST/B2B1[6]
+                         net (fo=1, unplaced)         0.000     0.476    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/DSP48E2_inst/DSP_PREADD_DATA.B2B1<6>
+                         DSP_MULTIPLIER (Prop_DSP_MULTIPLIER_B2B1[6]_U[35])
+                                                      0.462     0.938 f  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/DSP48E2_inst/DSP_MULTIPLIER_INST/U[35]
+                         net (fo=1, unplaced)         0.000     0.938    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/DSP48E2_inst/DSP_MULTIPLIER.U<35>
+                         DSP_M_DATA (Prop_DSP_M_DATA_U[35]_U_DATA[35])
+                                                      0.035     0.973 r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/DSP48E2_inst/DSP_M_DATA_INST/U_DATA[35]
+                         net (fo=1, unplaced)         0.000     0.973    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/DSP48E2_inst/DSP_M_DATA.U_DATA<35>
+                         DSP_ALU (Prop_DSP_ALU_U_DATA[35]_ALU_OUT[35])
+                                                      0.451     1.424 f  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/DSP48E2_inst/DSP_ALU_INST/ALU_OUT[35]
+                         net (fo=1, unplaced)         0.000     1.424    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/DSP48E2_inst/DSP_ALU.ALU_OUT<35>
+                         DSP_OUTPUT (Prop_DSP_OUTPUT_ALU_OUT[35]_P[35])
+                                                      0.089     1.513 r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/DSP48E2_inst/DSP_OUTPUT_INST/P[35]
+                         net (fo=3, unplaced)         0.223     1.736    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/P_internal[35]
+                         LUT6 (Prop_LUT6_I0_O)        0.135     1.871 f  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3[6]_i_4__62/O
+                         net (fo=4, unplaced)         0.187     2.058    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3[6]_i_4__62_n_0
+                         LUT4 (Prop_LUT4_I1_O)        0.031     2.089 f  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3[9]_i_6__62/O
+                         net (fo=2, unplaced)         0.175     2.264    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3[9]_i_6__62_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.031     2.295 r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3[9]_i_3__62/O
+                         net (fo=26, unplaced)        0.191     2.486    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/prod3[8]
+                         LUT5 (Prop_LUT5_I0_O)        0.089     2.575 r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3[7]_i_51__62/O
+                         net (fo=1, unplaced)         0.135     2.710    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3[7]_i_51__62_n_0
+                         LUT6 (Prop_LUT6_I3_O)        0.082     2.792 r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3[7]_i_28__62/O
+                         net (fo=2, unplaced)         0.135     2.927    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3[7]_i_28__62_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.082     3.009 r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3[7]_i_10__62/O
+                         net (fo=2, unplaced)         0.175     3.184    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3[7]_i_10__62_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.031     3.215 r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3[7]_i_18__62/O
+                         net (fo=1, unplaced)         0.026     3.241    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3[7]_i_18__62_n_0
+                         CARRY8 (Prop_CARRY8_S[1]_CO[7])
+                                                      0.176     3.417 r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3_reg[7]_i_2__62/CO[7]
+                         net (fo=1, unplaced)         0.005     3.422    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3_reg[7]_i_2__62_n_0
+                         CARRY8 (Prop_CARRY8_CI_O[1])
+                                                      0.067     3.489 r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3_reg[9]_i_2__62/O[1]
+                         net (fo=1, unplaced)         0.173     3.662    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3_reg[9]_i_2__62_n_14
+                         LUT6 (Prop_LUT6_I0_O)        0.031     3.693 r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3[9]_i_1__62/O
+                         net (fo=1, unplaced)         0.049     3.742    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3[9]_i_1__62_n_0
+                         FDCE                                         r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3_reg[9]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk rise edge)        5.000     5.000 r  
+                                                      0.000     5.000 r  clk (IN)
+                         net (fo=145004, unset)       0.017     5.017    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/clk
+                         FDCE                                         r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3_reg[9]/C
+                         clock pessimism              0.000     5.017    
+                         clock uncertainty           -0.035     4.982    
+                         FDCE (Setup_FDCE_C_D)        0.023     5.005    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[0].col_gen[0].pe_inst/accum_reg3_reg[9]
+  -------------------------------------------------------------------
+                         required time                          5.005    
+                         arrival time                          -3.742    
+  -------------------------------------------------------------------
+                         slack                                  1.263    
+
+
+
+
+
+Min Delay Paths
+--------------------------------------------------------------------------------------
+Slack (MET) :             0.061ns  (arrival time - required time)
+  Source:                 mxu_inst_gen[1].mxu_inst/skew_gen[1].with_delay.shift_reg_reg[0]/C
+                            (rising edge-triggered cell FDCE clocked by clk  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[1].col_gen[0].pe_inst/act_reg_reg[0]/D
+                            (rising edge-triggered cell FDCE clocked by clk  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk rise@0.000ns - clk rise@0.000ns)
+  Data Path Delay:        0.113ns  (logic 0.039ns (34.513%)  route 0.074ns (65.487%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.006ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    0.018ns
+    Source Clock Delay      (SCD):    0.012ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk rise edge)        0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=145004, unset)       0.012     0.012    mxu_inst_gen[1].mxu_inst/clk
+                         FDCE                                         r  mxu_inst_gen[1].mxu_inst/skew_gen[1].with_delay.shift_reg_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+                         FDCE (Prop_FDCE_C_Q)         0.039     0.051 r  mxu_inst_gen[1].mxu_inst/skew_gen[1].with_delay.shift_reg_reg[0]/Q
+                         net (fo=1, unplaced)         0.074     0.125    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[1].col_gen[0].pe_inst/act_reg_reg[35]_0[0]
+                         FDCE                                         r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[1].col_gen[0].pe_inst/act_reg_reg[0]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk rise edge)        0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=145004, unset)       0.018     0.018    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[1].col_gen[0].pe_inst/clk
+                         FDCE                                         r  mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[1].col_gen[0].pe_inst/act_reg_reg[0]/C
+                         clock pessimism              0.000     0.018    
+                         FDCE (Hold_FDCE_C_D)         0.046     0.064    mxu_inst_gen[1].mxu_inst/mac_array_inst/row_gen[1].col_gen[0].pe_inst/act_reg_reg[0]
+  -------------------------------------------------------------------
+                         required time                         -0.064    
+                         arrival time                           0.125    
+  -------------------------------------------------------------------
+                         slack                                  0.061    
+
+
+
+
+
+Pulse Width Checks
+--------------------------------------------------------------------------------------
+Clock Name:         clk
+Waveform(ns):       { 0.000 2.500 }
+Period(ns):         5.000
+Sources:            { clk }
+
+Check Type        Corner  Lib Pin     Reference Pin  Required(ns)  Actual(ns)  Slack(ns)  Location  Pin
+Min Period        n/a     SRL16E/CLK  n/a            0.936         5.000       4.064                c12_delay_fixed_reg[1][0]_srl6_mxu_inst_gen_c_3/CLK
+Low Pulse Width   Slow    SRL16E/CLK  n/a            0.468         2.500       2.032                c12_delay_fixed_reg[1][0]_srl6_mxu_inst_gen_c_3/CLK
+High Pulse Width  Slow    SRL16E/CLK  n/a            0.468         2.500       2.032                c12_delay_fixed_reg[1][0]_srl6_mxu_inst_gen_c_3/CLK
+
+
+

@@ -1,0 +1,18 @@
+{
+    "verilog.linting.linter": "iverilog",
+    "verilog.linting.path": "C:/msys64/ucrt64/bin",
+    "verilog.linting.iverilog.includePath": [
+        ".",
+        "c:/Users/HP/SRIP/SRIP/16_bit_posit_one_systolic/16_bit_posit_one_systolic"
+    ],
+    "verilog.linting.iverilog.arguments": "-g2012 -y . -I .",
+    "verilog.linting.iverilog.runAtFileLocation": true,
+    "verilog.linting.runOnOpen": true,
+    "verilog.linting.runOnSave": true,
+    "verilog.linting.verilator.includePath": [
+        ".",
+        "c:/Users/HP/SRIP/SRIP/16_bit_posit_one_systolic/16_bit_posit_one_systolic"
+    ],
+    "verilog.linting.verilator.arguments": "-y .",
+    "verilog.linting.verilator.runAtFileLocation": true
+}

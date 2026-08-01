@@ -1,0 +1,29 @@
+# Build & Simulation Artifacts
+*.vvp
+*.o
+*.log
+*.zip
+*.pth
+*.tar.gz
+*.gz
+data/
+*.hex
+*.txt
+!*.md
+!*.py
+!*.v
+!*.vh
+!*.sv
+!*.rpt
+
+# Temporary & Cache files
+__pycache__/
+.ipynb_checkpoints/
+*.tmp
+
+# Exclude generated simulation output traces
+dla_output_c.txt
+input_a.txt
+input_b.txt
+ramulator_trace.txt
+dla_program.hex
