@@ -13,5 +13,6 @@
 `define MAX_RECURSION_DEPTH 1
 `define TOTAL_PRODUCTS      7
 `define TOTAL_SCRATCH_SLOTS 14
+`define NUM_WORDS           512
 
 `endif // STRASSEN_PKG_VH
