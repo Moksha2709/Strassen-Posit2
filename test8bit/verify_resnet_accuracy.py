@@ -215,9 +215,31 @@ SRC_FILES = [
 ]
 _compiled = False
 
+def compile_verilog():
+    global _compiled
+    if not _compiled:
+        print("[INFO] Compiling Posit DLA Verilog netlist with iverilog (ONCE)...")
+        compiler = DLACompiler()
+        _, prog_hex = compiler.compile_conv_layer(
+            h=8, w=8, c=64, kh=1, kw=1, stride=1, padding=0,
+            out_channels=64, use_relu=False, simd_mode=False
+        )
+        with open("dla_program.hex", "w") as f:
+            f.write(prog_hex)
+
+        cmd = ["iverilog", "-g2012", "-DSIMULATION", "-DNUM_WORDS=512",
+               "-I", ".", "-o", "dla_sim.vvp"] + SRC_FILES
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        if res.returncode != 0:
+            raise RuntimeError(f"iverilog compile failed:\n{res.stderr}")
+        _compiled = True
+        print("[INFO] Netlist compilation complete! Engine ready for tile execution.\n")
+
 def run_hw_tile(a_tiles_3, b_tiles_3):
     """a_tiles_3 / b_tiles_3: each a list of 3 (64x64) matrices (one per
     triple-packed job). Returns 3 (64x64) output matrices."""
+    compile_verilog()
+
     if os.path.exists("dla_output_c.txt"):
         try:
             os.remove("dla_output_c.txt")
@@ -226,20 +248,6 @@ def run_hw_tile(a_tiles_3, b_tiles_3):
 
     write_matrix_tile_file("input_a.txt", a_tiles_3)
     write_matrix_tile_file("input_b.txt", b_tiles_3)
-
-    compiler = DLACompiler()
-    _, prog_hex = compiler.compile_conv_layer(
-        h=8, w=8, c=64, kh=1, kw=1, stride=1, padding=0,
-        out_channels=64, use_relu=False, simd_mode=False
-    )
-    with open("dla_program.hex", "w") as f:
-        f.write(prog_hex)
-
-    cmd = ["iverilog", "-g2012", "-DSIMULATION", "-DNUM_WORDS=512",
-           "-I", ".", "-o", "dla_sim.vvp"] + SRC_FILES
-    res = subprocess.run(cmd, capture_output=True, text=True)
-    if res.returncode != 0:
-        raise RuntimeError(f"iverilog compile failed:\n{res.stderr}")
 
     res = subprocess.run(["vvp", "dla_sim.vvp"], capture_output=True, text=True)
     if res.returncode != 0:
