@@ -28,7 +28,7 @@ module eval_tb;
         .SZI(8),
         .SZJ(8),
         .DATA_WIDTH(16),
-        .FRAC_WIDTH(8)
+        .FRAC_WIDTH(4)
     ) uut (
         .clk(clk),
         .resetn(resetn),
