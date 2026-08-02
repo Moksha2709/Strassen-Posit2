@@ -24,8 +24,8 @@ module fixed_to_posit_conv_8b (
         end
     end
 
-    // Scale calculation (radix point is at 4 for Q4.4 fixed-point inputs, so scale = lead_one - 4)
-    wire signed [5:0] scale = $signed({1'b0, lead_one}) - 6'sd4;
+    // Scale calculation (radix point is at 16 for Q8.16 fixed-point inputs, so scale = lead_one - 16)
+    wire signed [5:0] scale = $signed({1'b0, lead_one}) - 6'sd16;
     wire [23:0] normalized = abs_val << (5'd23 - lead_one);
 
     // Assemble decoded struct for 8-bit Posit

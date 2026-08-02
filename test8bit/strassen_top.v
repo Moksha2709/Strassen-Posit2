@@ -38,7 +38,7 @@ module strassen_top #(
 
     localparam PW = POSIT_WIDTH;
     localparam JOB_W = PW * 3; // 24 bits
-    localparam BUS_W = 48;     // 3 channels x 16-bit Q4.4
+    localparam BUS_W = 72;     // 3 channels x 24-bit Q8.16
 
     // =========================================================================
     // 1. Tile Loading Counters and Logic
@@ -265,7 +265,7 @@ module strassen_top #(
     assign b22_row = (ctrl_state == 4'd1 && ctrl_cnt < SZI) ? b22_flat[ctrl_cnt[$clog2(SZI)-1:0]*SZJ*JOB_W +: SZJ*JOB_W] : {SZJ*JOB_W{1'b0}};
 
     // =========================================================================
-    // 5. Early Decoders (Multiplexed 8-bit Posit to 16-bit Q4.4 Fixed-Point, 3 channels)
+    // 5. Early Decoders (Multiplexed 8-bit Posit to 24-bit Q8.16 Fixed-Point, 3 channels)
     // =========================================================================
     wire [SZI*BUS_W-1:0] a11_col_fixed, a12_col_fixed, a21_col_fixed, a22_col_fixed;
     wire [SZJ*BUS_W-1:0] b11_row_fixed, b12_row_fixed, b21_row_fixed, b22_row_fixed;
@@ -274,19 +274,19 @@ module strassen_top #(
     generate
         for (da = 0; da < SZI; da = da + 1) begin : dec_a_loop
             for (ch = 0; ch < 3; ch = ch + 1) begin : dec_a_ch_8b
-                posit_to_fixed_conv_8b d8_a11 (.in(a11_col[(da*24 + ch*8) +: 8]), .out(a11_col_fixed[(da*48 + ch*16) +: 16]));
-                posit_to_fixed_conv_8b d8_a12 (.in(a12_col[(da*24 + ch*8) +: 8]), .out(a12_col_fixed[(da*48 + ch*16) +: 16]));
-                posit_to_fixed_conv_8b d8_a21 (.in(a21_col[(da*24 + ch*8) +: 8]), .out(a21_col_fixed[(da*48 + ch*16) +: 16]));
-                posit_to_fixed_conv_8b d8_a22 (.in(a22_col[(da*24 + ch*8) +: 8]), .out(a22_col_fixed[(da*48 + ch*16) +: 16]));
+                posit_to_fixed_conv_8b_wide d8_a11 (.in(a11_col[(da*24 + ch*8) +: 8]), .out(a11_col_fixed[(da*72 + ch*24) +: 24]));
+                posit_to_fixed_conv_8b_wide d8_a12 (.in(a12_col[(da*24 + ch*8) +: 8]), .out(a12_col_fixed[(da*72 + ch*24) +: 24]));
+                posit_to_fixed_conv_8b_wide d8_a21 (.in(a21_col[(da*24 + ch*8) +: 8]), .out(a21_col_fixed[(da*72 + ch*24) +: 24]));
+                posit_to_fixed_conv_8b_wide d8_a22 (.in(a22_col[(da*24 + ch*8) +: 8]), .out(a22_col_fixed[(da*72 + ch*24) +: 24]));
             end
         end
 
         for (da = 0; da < SZJ; da = da + 1) begin : dec_b_loop
             for (ch = 0; ch < 3; ch = ch + 1) begin : dec_b_ch_8b
-                posit_to_fixed_conv_8b d8_b11 (.in(b11_row[(da*24 + ch*8) +: 8]), .out(b11_row_fixed[(da*48 + ch*16) +: 16]));
-                posit_to_fixed_conv_8b d8_b12 (.in(b12_row[(da*24 + ch*8) +: 8]), .out(b12_row_fixed[(da*48 + ch*16) +: 16]));
-                posit_to_fixed_conv_8b d8_b21 (.in(b21_row[(da*24 + ch*8) +: 8]), .out(b21_row_fixed[(da*48 + ch*16) +: 16]));
-                posit_to_fixed_conv_8b d8_b22 (.in(b22_row[(da*24 + ch*8) +: 8]), .out(b22_row_fixed[(da*48 + ch*16) +: 16]));
+                posit_to_fixed_conv_8b_wide d8_b11 (.in(b11_row[(da*24 + ch*8) +: 8]), .out(b11_row_fixed[(da*72 + ch*24) +: 24]));
+                posit_to_fixed_conv_8b_wide d8_b12 (.in(b12_row[(da*24 + ch*8) +: 8]), .out(b12_row_fixed[(da*72 + ch*24) +: 24]));
+                posit_to_fixed_conv_8b_wide d8_b21 (.in(b21_row[(da*24 + ch*8) +: 8]), .out(b21_row_fixed[(da*72 + ch*24) +: 24]));
+                posit_to_fixed_conv_8b_wide d8_b22 (.in(b22_row[(da*24 + ch*8) +: 8]), .out(b22_row_fixed[(da*72 + ch*24) +: 24]));
             end
         end
     endgenerate
@@ -385,7 +385,7 @@ module strassen_top #(
     strassen_preprocess #(.WIDTH(SZJ), .DATA_WIDTH(BUS_W)) post2_inst2 (.clk(clk), .resetn(resetn), .op_sub(1'b0), .passthrough(1'b0), .in_a(post1_out_fixed[3]), .in_b(post1_out_fixed[4]), .out(c22_stage2_fixed));
 
     // =========================================================================
-    // 10. Late Encoders (Q4.4 Fixed-Point to 8-bit Posit, 3 channels)
+    // 10. Late Encoders (Q8.16 Fixed-Point to 8-bit Posit, 3 channels)
     // =========================================================================
     wire [SZJ*JOB_W-1:0] c11_stage2;
     wire [SZJ*JOB_W-1:0] c12_aligned;
@@ -396,10 +396,10 @@ module strassen_top #(
     generate
         for (ec = 0; ec < SZJ; ec = ec + 1) begin : enc_post_gen
             for (ech = 0; ech < 3; ech = ech + 1) begin : enc_post_ch_8b
-                fixed_to_posit_conv_8b e8_c11 (.in(c11_stage2_fixed[(ec*48 + ech*16) +: 16]), .out(c11_stage2[(ec*24 + ech*8) +: 8]));
-                fixed_to_posit_conv_8b e8_c12 (.in(c12_aligned_fixed[(ec*48 + ech*16) +: 16]), .out(c12_aligned[(ec*24 + ech*8) +: 8]));
-                fixed_to_posit_conv_8b e8_c21 (.in(c21_aligned_fixed[(ec*48 + ech*16) +: 16]), .out(c21_aligned[(ec*24 + ech*8) +: 8]));
-                fixed_to_posit_conv_8b e8_c22 (.in(c22_stage2_fixed[(ec*48 + ech*16) +: 16]), .out(c22_stage2[(ec*24 + ech*8) +: 8]));
+                fixed_to_posit_conv_8b e8_c11 (.in(c11_stage2_fixed[(ec*72 + ech*24) +: 24]), .out(c11_stage2[(ec*24 + ech*8) +: 8]));
+                fixed_to_posit_conv_8b e8_c12 (.in(c12_aligned_fixed[(ec*72 + ech*24) +: 24]), .out(c12_aligned[(ec*24 + ech*8) +: 8]));
+                fixed_to_posit_conv_8b e8_c21 (.in(c21_aligned_fixed[(ec*72 + ech*24) +: 24]), .out(c21_aligned[(ec*24 + ech*8) +: 8]));
+                fixed_to_posit_conv_8b e8_c22 (.in(c22_stage2_fixed[(ec*72 + ech*24) +: 24]), .out(c22_stage2[(ec*24 + ech*8) +: 8]));
             end
         end
     endgenerate

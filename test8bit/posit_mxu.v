@@ -1,15 +1,16 @@
 // =============================================================================
-// posit_mxu.v — Verilog (Delayed Normalization Architecture)
+// posit_mxu.v — Verilog (Delayed Normalization Architecture with Q8.16 Interconnect)
 // Matrix Execution Unit: Manages systolic skewing and boundary exponent alignment.
-// Dynamic alignment (align_q44) is executed ONCE at the bottom boundary!
-// Optimized 36-bit activation bus / 48-bit weight readout bus.
+// Dynamic alignment (align_q816) is executed ONCE at the bottom boundary!
+// Wide 72-bit interconnect footprint (3 channels x 24-bit Q8.16).
 // =============================================================================
 `include "posit_pkg.vh"
 `include "strassen_pkg.vh"
 
 module posit_mxu #(
     parameter SZI         = `DEFAULT_SZI,
-    parameter SZJ         = `DEFAULT_SZJ
+    parameter SZJ         = `DEFAULT_SZJ,
+    parameter DATA_WIDTH  = 72
 ) (
     input  wire                             clk,
     input  wire                             resetn,
@@ -20,10 +21,10 @@ module posit_mxu #(
     input  wire                             shift_out,
     input  wire                             shift_load,
 
-    // Vectors (flat: carrying 3 packed 16-bit elements per index = 48 bits)
-    input  wire [SZI*48-1:0]                a,  // Activations (unskewed fixed-point): 3x 16-bit Q4.4 per row
-    input  wire [SZJ*48-1:0]                b,  // Weights / Shift-in: 3x 16-bit Q4.4 or accumulators per col
-    output wire [SZJ*48-1:0]                c   // Outputs (skewed fixed-point accumulators): 3x 16-bit per col
+    // Vectors (flat: carrying 3 packed 24-bit elements per index = 72 bits)
+    input  wire [SZI*DATA_WIDTH-1:0]        a,  // Activations (unskewed fixed-point): 3x 24-bit Q8.16 per row
+    input  wire [SZJ*DATA_WIDTH-1:0]        b,  // Weights / Shift-in: 3x 24-bit Q8.16 or accumulators per col
+    output wire [SZJ*DATA_WIDTH-1:0]        c   // Outputs (skewed fixed-point accumulators): 3x 24-bit per col
 );
 
     // =========================================================================
@@ -35,7 +36,7 @@ module posit_mxu #(
         for (row = 0; row < SZI; row = row + 1) begin : dec_row_loop
             for (ch = 0; ch < 3; ch = ch + 1) begin : dec_ch_loop
                 fixed_to_decoded_conv dec_inst (
-                    .in(a[(row*48 + ch*16) +: 16]),
+                    .in(a[(row*72 + ch*24) +: 24]),
                     .out(a_dec[(row*36 + ch*12) +: 12])
                 );
             end
@@ -72,30 +73,30 @@ module posit_mxu #(
     endgenerate
 
     // =========================================================================
-    // 3. Systolic Weight/Readout Skewing (delay col j by j cycles, 48-bit width)
+    // 3. Systolic Weight/Readout Skewing (delay col j by j cycles, 72-bit / 48-bit width)
     // =========================================================================
-    wire [SZJ*48-1:0] b_skewed;
+    wire [SZJ*72-1:0] b_skewed;
     genvar gj;
     generate
         for (gj = 0; gj < SZJ; gj = gj + 1) begin : skew_gen_b
             if (gj == 0) begin : no_delay_b
-                assign b_skewed[gj*48 +: 48] = b[gj*48 +: 48];
+                assign b_skewed[gj*72 +: 72] = b[gj*72 +: 72];
             end else begin : with_delay_b
-                reg [gj*48-1:0] shift_reg_b;
+                reg [gj*72-1:0] shift_reg_b;
 
                 always @(posedge clk or negedge resetn) begin
                     if (!resetn) begin
-                        shift_reg_b <= {(gj*48){1'b0}};
+                        shift_reg_b <= {(gj*72){1'b0}};
                     end else begin
                         if (gj == 1) begin
-                            shift_reg_b[48-1:0] <= b[gj*48 +: 48];
+                            shift_reg_b[72-1:0] <= b[gj*72 +: 72];
                         end else begin
-                            shift_reg_b <= {shift_reg_b[(gj-1)*48-1:0], b[gj*48 +: 48]};
+                            shift_reg_b <= {shift_reg_b[(gj-1)*72-1:0], b[gj*72 +: 72]};
                         end
                     end
                 end
 
-                assign b_skewed[gj*48 +: 48] = shift_reg_b[gj*48-1 -: 48];
+                assign b_skewed[gj*72 +: 72] = shift_reg_b[gj*72-1 -: 72];
             end
         end
     endgenerate
@@ -110,11 +111,11 @@ module posit_mxu #(
             wire [35:0] col_b_dec;
             for (cch = 0; cch < 3; cch = cch + 1) begin : weight_dec_ch
                 fixed_to_decoded_conv dec_inst (
-                    .in(b_skewed[(col*48 + cch*16) +: 16]),
+                    .in(b_skewed[(col*72 + cch*24) +: 24]),
                     .out(col_b_dec[(cch*12) +: 12])
                 );
             end
-            assign b_in_mux[col*48 +: 48] = shift_out ? b_skewed[col*48 +: 48] : {12'b0, col_b_dec};
+            assign b_in_mux[col*48 +: 48] = shift_out ? b_skewed[col*72 +: 48] : {12'b0, col_b_dec};
         end
     endgenerate
 
@@ -138,36 +139,36 @@ module posit_mxu #(
     );
 
     // =========================================================================
-    // 6. Boundary Exponent Alignment (Delayed Normalization)
+    // 6. Boundary Exponent Alignment (Delayed Normalization to Q8.16)
     // Performs dynamic exponent shifting ONCE per column output at boundary!
     // =========================================================================
-    function automatic [15:0] align_q44_boundary (
+    function automatic [23:0] align_q816_boundary (
         input signed [9:0]   accum,
         input signed [5:0]   scale
     );
-        reg signed [15:0] val;
-        reg [3:0] sh;
+        reg signed [23:0] val;
+        reg [4:0] sh;
         reg sign;
         reg [9:0] abs_accum;
         begin
             if (accum == 10'sd0) begin
-                align_q44_boundary = 16'h0000;
+                align_q816_boundary = 24'h000000;
             end else begin
                 sign = accum[9];
                 abs_accum = sign ? -accum : accum;
-                if (scale >= 6'sd2) begin
-                    sh = scale[3:0] - 4'd2;
-                    val = {6'b0, abs_accum} << sh;
+                if (scale >= 6'sd14) begin
+                    sh = scale[4:0] - 5'd14;
+                    val = {14'b0, abs_accum} << sh;
                 end else begin
-                    sh = 4'd2 - scale[3:0];
-                    val = {6'b0, abs_accum} >> sh;
+                    sh = 5'd14 - scale[4:0];
+                    val = {14'b0, abs_accum} >> sh;
                 end
-                align_q44_boundary = sign ? -val : val;
+                align_q816_boundary = sign ? -val : val;
             end
         end
     endfunction
 
-    wire [SZJ*48-1:0] c_aligned;
+    wire [SZJ*72-1:0] c_aligned;
     genvar col_idx, ch_idx;
     generate
         for (col_idx = 0; col_idx < SZJ; col_idx = col_idx + 1) begin : align_col_loop
@@ -175,7 +176,7 @@ module posit_mxu #(
                 wire [15:0] ch_word = mac_q_out[(col_idx*48 + ch_idx*16) +: 16];
                 wire signed [5:0] ch_scale = ch_word[15:10];
                 wire signed [9:0] ch_accum = ch_word[9:0];
-                assign c_aligned[(col_idx*48 + ch_idx*16) +: 16] = align_q44_boundary(ch_accum, ch_scale);
+                assign c_aligned[(col_idx*72 + ch_idx*24) +: 24] = align_q816_boundary(ch_accum, ch_scale);
             end
         end
     endgenerate

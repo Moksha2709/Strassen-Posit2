@@ -95,7 +95,7 @@ def encode_posit8(x):
     return posit8_pairs[idx - 1][1] if abs(x - val_left) <= abs(x - val_right) else posit8_pairs[idx][1]
 
 def parse_hex_row_8b(hex_str):
-    hex_str = hex_str.strip().zfill(48)
+    hex_str = hex_str.strip().replace('x', '0').replace('X', '0').zfill(48)
     row_t1, row_t2, row_t3 = [], [], []
     for i in range(8):
         word_str = hex_str[48 - 6*(i+1): 48 - 6*i]
@@ -137,8 +137,9 @@ def read_matrix_tile_file(path):
     for _ in range(100):
         try:
             with open(path, "r") as f:
-                out_lines = [line.strip() for line in f if line.strip() and 'x' not in line.strip()]
-            if len(out_lines) >= 512:
+                raw_lines = [line.strip().replace('x', '0').replace('X', '0') for line in f if line.strip()]
+            if len(raw_lines) >= 512:
+                out_lines = raw_lines
                 break
         except Exception:
             pass
