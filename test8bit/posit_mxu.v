@@ -156,11 +156,11 @@ module posit_mxu #(
             end else begin
                 sign = accum[9];
                 abs_accum = sign ? -accum : accum;
-                if (scale >= 6'sd14) begin
-                    sh = scale[4:0] - 5'd14;
+                if (scale >= -6'sd10) begin
+                    sh = scale[4:0] + 5'd10;
                     val = {14'b0, abs_accum} << sh;
                 end else begin
-                    sh = 5'd14 - scale[4:0];
+                    sh = -5'd10 - scale[4:0];
                     val = {14'b0, abs_accum} >> sh;
                 end
                 align_q816_boundary = sign ? -val : val;

@@ -129,6 +129,8 @@ def write_matrix_tile_file(path, mats):
                     q1, q2, q3 = quads[0][q_idx], quads[1][q_idx], quads[2][q_idx]
                     for r in range(8):
                         f.write(pack_hex_row_8b(q1[r], q2[r], q3[r]) + "\n")
+        f.flush()
+        os.fsync(f.fileno())
 
 def read_matrix_tile_file(path):
     """Inverse of write_matrix_tile_file: returns 3 (64x64) matrices."""
@@ -227,6 +229,8 @@ def compile_verilog():
         )
         with open("dla_program.hex", "w") as f:
             f.write(prog_hex)
+            f.flush()
+            os.fsync(f.fileno())
 
         cmd = ["iverilog", "-g2012", "-DSIMULATION", "-DNUM_WORDS=512",
                "-I", ".", "-o", "dla_sim.vvp"] + SRC_FILES
@@ -257,6 +261,8 @@ def run_hw_tile(a_tiles_3, b_tiles_3):
     )
     with open("dla_program.hex", "w") as f:
         f.write(prog_hex)
+        f.flush()
+        os.fsync(f.fileno())
 
     res = subprocess.run(["vvp", "dla_sim.vvp"], capture_output=True, text=True)
     if res.returncode != 0:
