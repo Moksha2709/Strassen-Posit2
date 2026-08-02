@@ -254,16 +254,6 @@ def run_hw_tile(a_tiles_3, b_tiles_3):
     write_matrix_tile_file("input_a.txt", a_tiles_3)
     write_matrix_tile_file("input_b.txt", b_tiles_3)
 
-    compiler = DLACompiler()
-    _, prog_hex = compiler.compile_conv_layer(
-        h=8, w=8, c=64, kh=1, kw=1, stride=1, padding=0,
-        out_channels=64, use_relu=False, simd_mode=False
-    )
-    with open("dla_program.hex", "w") as f:
-        f.write(prog_hex)
-        f.flush()
-        os.fsync(f.fileno())
-
     res = subprocess.run(["vvp", "dla_sim.vvp"], capture_output=True, text=True)
     if res.returncode != 0:
         raise RuntimeError(f"vvp execution failed:\n{res.stderr}")
