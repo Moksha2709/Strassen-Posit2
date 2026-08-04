@@ -7,6 +7,7 @@
 import os
 import sys
 import math
+import argparse
 import torch
 import numpy as np
 
@@ -29,18 +30,47 @@ def pad_to_64x64(mat):
             padded[r][c] = mat[r][c]
     return padded
 
+def find_weights_file(custom_path=None):
+    candidates = []
+    if custom_path:
+        candidates.append(custom_path)
+    
+    candidates.extend([
+        "weights_resnet50_cifar10_seed42_fp32.pth",
+        "../weights_resnet50_cifar10_seed42_fp32.pth",
+        "../test8bit/weights_resnet50_cifar10_seed42_fp32.pth",
+        "test8bit/weights_resnet50_cifar10_seed42_fp32.pth",
+        "ckpt_resnet50_cifar10_seed42_epoch125.pth",
+        "../ckpt_resnet50_cifar10_seed42_epoch125.pth",
+    ])
+    for path in candidates:
+        if os.path.exists(path):
+            return path, candidates
+    return None, candidates
+
 def main():
+    parser = argparse.ArgumentParser(description="Single 8-Bit Posit Unit Accuracy (.pth weights)")
+    parser.add_argument("--weights", default=None, help="Path to PyTorch model weights checkpoint (.pth)")
+    args = parser.parse_args()
+
     print("=" * 80)
     print("  8-BIT TRIPLE-PACKED POSIT DLA: SINGLE-UNIT ACCURACY AUDIT (.PTH MODEL WEIGHTS)")
     print("=" * 80)
 
-    weights_path = "weights_resnet50_cifar10_seed42_fp32.pth"
-    if not os.path.exists(weights_path):
-        weights_path = "../test8bit/weights_resnet50_cifar10_seed42_fp32.pth"
+    weights_path, checked_paths = find_weights_file(args.weights)
+    if not weights_path:
+        print("[ERR] Could not find PyTorch model checkpoint (.pth) file!")
+        print("Checked paths:")
+        for p in checked_paths:
+            print(f"  - {p}")
+        print("\nPlease specify your weights file via --weights argument:")
+        print("  python3 verify_triple_packed_unit_accuracy_pth.py --weights /path/to/weights.pth\n")
+        sys.exit(1)
 
     print(f"\n[1/3] Loading PyTorch model checkpoint: {weights_path}...")
     layers = get_cifar_resnet50_conv_layers(weights_path=weights_path, dataset_name="cifar10")
 
+    # Select 3 distinct layers for the 3 triple-packed lanes
     l1_spec = layers[0]  # conv1
     l2_spec = layers[2]  # layer1.0.conv2
     l3_spec = layers[3]  # layer1.0.conv3
@@ -54,6 +84,7 @@ def main():
     m2_a, m2_b = im2col_matrices(l2_spec["input"], l2_spec["weight"], l2_spec["stride"], l2_spec["padding"])
     m3_a, m3_b = im2col_matrices(l3_spec["input"], l3_spec["weight"], l3_spec["stride"], l3_spec["padding"])
 
+    # Slice and pad 64x64 tiles
     a1, b1 = pad_to_64x64(m1_a), pad_to_64x64(m1_b)
     a2, b2 = pad_to_64x64(m2_a), pad_to_64x64(m2_b)
     a3, b3 = pad_to_64x64(m3_a), pad_to_64x64(m3_b)
@@ -68,6 +99,7 @@ def main():
 
     c1_hw, c2_hw, c3_hw = hw_outputs[0], hw_outputs[1], hw_outputs[2]
 
+    # Evaluate accuracy metrics
     cos1, sqnr1, rmse1 = compare([val for row in c1_hw for val in row], [val for row in c1_ref for val in row])
     cos2, sqnr2, rmse2 = compare([val for row in c2_hw for val in row], [val for row in c2_ref for val in row])
     cos3, sqnr3, rmse3 = compare([val for row in c3_hw for val in row], [val for row in c3_ref for val in row])
