@@ -2,7 +2,9 @@
 *.vvp
 *.o
 *.log
+*.jou
 *.zip
+a.out
 *.pth
 *.tar.gz
 *.gz
