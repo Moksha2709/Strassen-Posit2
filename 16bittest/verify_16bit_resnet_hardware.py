@@ -83,9 +83,10 @@ def read_output_quadrants(filename):
         c_16x16.append(c21[i] + c22[i])
     return c_16x16
 
-def compile_verilog_netlist():
-    """Compiles Verilog netlist once at script initialization."""
-    print("[INFO] Compiling Verilog hardware netlist with iverilog (ONCE)...")
+def compile_verilog_netlist(output_vvp="temp_16bit_sim.vvp"):
+    """Compiles Verilog source files (.v) directly using iverilog on the fly."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    print("[INFO] Compiling Verilog source files (.v) with iverilog...")
     verilog_files = [
         "eval_tb.v",
         "fixed_pe.v",
@@ -96,16 +97,35 @@ def compile_verilog_netlist():
         "strassen_scratchpad.v",
         "strassen_top.v"
     ]
-    cmd_compile = ["iverilog", "-g2012", "-I", ".", "-o", "eval_sim.vvp"] + verilog_files
-    subprocess.run(cmd_compile, check=True)
-    print("[INFO] Compilation successful! Hardware simulation engine initialized.\n")
+    verilog_paths = [os.path.join(base_dir, f) for f in verilog_files]
+    for vp in verilog_paths:
+        if not os.path.exists(vp):
+            raise FileNotFoundError(f"Required Verilog source file not found: {vp}")
 
-def run_one_16x16_tile(a16, b16):
-    """Executes single 16x16 tile multiplication on RTL hardware via vvp simulation."""
-    write_quadrant_file(a16, "input_a.txt")
-    write_quadrant_file(b16, "input_b.txt")
-    subprocess.run(["vvp", "eval_sim.vvp"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    return read_output_quadrants("output_c.txt")
+    out_path = os.path.join(base_dir, output_vvp)
+    cmd_compile = ["iverilog", "-g2012", "-I", base_dir, "-o", out_path] + verilog_paths
+    res = subprocess.run(cmd_compile, capture_output=True, text=True)
+    if res.returncode != 0:
+        raise RuntimeError(f"iverilog compilation failed:\n{res.stderr}")
+    print("[INFO] Verilog (.v) compilation successful!\n")
+    return out_path
+
+def run_one_16x16_tile(a16, b16, sim_bin="temp_16bit_sim.vvp"):
+    """Executes single 16x16 tile multiplication on RTL hardware compiled from .v files."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    if not os.path.isabs(sim_bin):
+        sim_bin = os.path.join(base_dir, sim_bin)
+    if not os.path.exists(sim_bin):
+        sim_bin = compile_verilog_netlist(os.path.basename(sim_bin))
+
+    in_a = os.path.join(base_dir, "input_a.txt")
+    in_b = os.path.join(base_dir, "input_b.txt")
+    out_c = os.path.join(base_dir, "output_c.txt")
+
+    write_quadrant_file(a16, in_a)
+    write_quadrant_file(b16, in_b)
+    subprocess.run(["vvp", sim_bin], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return read_output_quadrants(out_c)
 
 def tiled_gemm_hw(matrix_a, matrix_b, M, K, N, use_relu=True):
     """Tiled GEMM executing 16x16 tiles directly on Verilog RTL hardware engine."""

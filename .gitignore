@@ -11,6 +11,8 @@ a.out
 data/
 *.hex
 *.txt
+!8bittest_q4_4.zip
+!8posit.zip
 !*.md
 !*.py
 !*.v

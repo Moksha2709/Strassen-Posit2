@@ -39,7 +39,11 @@ def find_weights_file(custom_path=None):
         "weights_resnet50_cifar10_seed42_fp32.pth",
         "../weights_resnet50_cifar10_seed42_fp32.pth",
         "../test8bit/weights_resnet50_cifar10_seed42_fp32.pth",
+        "../../test8bit/weights_resnet50_cifar10_seed42_fp32.pth",
         "test8bit/weights_resnet50_cifar10_seed42_fp32.pth",
+        os.path.expanduser("~/test8bit/weights_resnet50_cifar10_seed42_fp32.pth"),
+        os.path.expanduser("~/8bitnew/test8bit/weights_resnet50_cifar10_seed42_fp32.pth"),
+        os.path.expanduser("~/test8opti/weights_resnet50_cifar10_seed42_fp32.pth"),
         "ckpt_resnet50_cifar10_seed42_epoch125.pth",
         "../ckpt_resnet50_cifar10_seed42_epoch125.pth",
     ])

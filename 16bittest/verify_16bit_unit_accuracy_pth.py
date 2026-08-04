@@ -80,10 +80,14 @@ def main():
     tile_a = [row[:16] for row in matrix_a[:16]]
     tile_b = [row[:16] for row in matrix_b[:16]]
 
-    print("[3/3] Computing FP32 Ground Truth & Executing Verilog RTL Hardware Tile (`vvp eval_sim.vvp`)...")
+    print("[3/3] Computing FP32 Ground Truth & Compiling Verilog RTL source files (.v) on the fly...")
     c_ref = matmul_fp32(tile_a, tile_b)
-    compile_verilog_netlist()
-    c_hw = run_one_16x16_tile(tile_a, tile_b)
+    sim_bin = compile_verilog_netlist("temp_16bit_pth_sim.vvp")
+    try:
+        c_hw = run_one_16x16_tile(tile_a, tile_b, sim_bin=sim_bin)
+    finally:
+        if os.path.exists(sim_bin):
+            os.remove(sim_bin)
 
     cosine_sim, sqnr_db, rmse = compute_accuracy_metrics(c_hw, c_ref)
 

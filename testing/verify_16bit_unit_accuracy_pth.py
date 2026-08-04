@@ -58,14 +58,34 @@ def compute_accuracy_metrics(pred_matrix, ref_matrix):
 
     return cosine_sim, sqnr_db, rmse
 
+def find_weights_file(custom_path=None):
+    candidates = []
+    if custom_path:
+        candidates.append(custom_path)
+    
+    candidates.extend([
+        "weights_resnet50_cifar10_seed42_fp32.pth",
+        "../weights_resnet50_cifar10_seed42_fp32.pth",
+        "../test8bit/weights_resnet50_cifar10_seed42_fp32.pth",
+        "../../test8bit/weights_resnet50_cifar10_seed42_fp32.pth",
+        "test8bit/weights_resnet50_cifar10_seed42_fp32.pth",
+        os.path.expanduser("~/test8bit/weights_resnet50_cifar10_seed42_fp32.pth"),
+        os.path.expanduser("~/8bitnew/test8bit/weights_resnet50_cifar10_seed42_fp32.pth"),
+        os.path.expanduser("~/test8opti/weights_resnet50_cifar10_seed42_fp32.pth"),
+        "ckpt_resnet50_cifar10_seed42_epoch125.pth",
+        "../ckpt_resnet50_cifar10_seed42_epoch125.pth",
+    ])
+    for path in candidates:
+        if os.path.exists(path):
+            return path, candidates
+    return None, candidates
+
 def main():
     print("=" * 80)
     print("  16-BIT Q8.8 STRASSEN DLA: SINGLE-UNIT ACCURACY AUDIT (.PTH MODEL WEIGHTS)")
     print("=" * 80)
 
-    weights_path = "../test8bit/weights_resnet50_cifar10_seed42_fp32.pth"
-    if not os.path.exists(weights_path):
-        weights_path = "weights_resnet50_cifar10_seed42_fp32.pth"
+    weights_path, _ = find_weights_file()
 
     print(f"\n[1/3] Loading PyTorch model checkpoint: {weights_path}...")
     layers = get_cifar_resnet50_conv_layers(weights_path=weights_path, dataset_name="cifar10")
@@ -79,10 +99,14 @@ def main():
     tile_a = [row[:16] for row in matrix_a[:16]]
     tile_b = [row[:16] for row in matrix_b[:16]]
 
-    print("[3/3] Computing FP32 Ground Truth & Executing Verilog RTL Hardware Tile (`vvp eval_sim.vvp`)...")
+    print("[3/3] Computing FP32 Ground Truth & Compiling Verilog RTL source files (.v) on the fly...")
     c_ref = matmul_fp32(tile_a, tile_b)
-    compile_verilog_netlist()
-    c_hw = run_one_16x16_tile(tile_a, tile_b)
+    sim_bin = compile_verilog_netlist("temp_16bit_pth_sim.vvp")
+    try:
+        c_hw = run_one_16x16_tile(tile_a, tile_b, sim_bin=sim_bin)
+    finally:
+        if os.path.exists(sim_bin):
+            os.remove(sim_bin)
 
     cosine_sim, sqnr_db, rmse = compute_accuracy_metrics(c_hw, c_ref)
 

@@ -73,9 +73,13 @@ def main():
     print("[2/3] Computing FP32 Ground Truth...")
     c_ref = matmul_fp32(a, b)
 
-    print("[3/3] Executing 100% True Verilog RTL Hardware Tile (`vvp eval_sim.vvp`)...")
-    compile_verilog_netlist()
-    c_hw = run_one_16x16_tile(a, b)
+    print("[3/3] Compiling Verilog RTL source files (.v) on the fly & executing tile simulation...")
+    sim_bin = compile_verilog_netlist("temp_16bit_unit_sim.vvp")
+    try:
+        c_hw = run_one_16x16_tile(a, b, sim_bin=sim_bin)
+    finally:
+        if os.path.exists(sim_bin):
+            os.remove(sim_bin)
 
     cosine_sim, sqnr_db, rmse = compute_accuracy_metrics(c_hw, c_ref)
 
