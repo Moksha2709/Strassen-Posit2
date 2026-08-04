@@ -67,9 +67,9 @@ def main():
     c1_hw, c2_hw, c3_hw = hw_outputs[0], hw_outputs[1], hw_outputs[2]
 
     # Evaluate accuracy metrics for each lane
-    cos1, sqnr1, rmse1 = compare(c1_hw, c1_ref)
-    cos2, sqnr2, rmse2 = compare(c2_hw, c2_ref)
-    cos3, sqnr3, rmse3 = compare(c3_hw, c3_ref)
+    cos1, sqnr1, rmse1 = compare([val for row in c1_hw for val in row], [val for row in c1_ref for val in row])
+    cos2, sqnr2, rmse2 = compare([val for row in c2_hw for val in row], [val for row in c2_ref for val in row])
+    cos3, sqnr3, rmse3 = compare([val for row in c3_hw for val in row], [val for row in c3_ref for val in row])
 
     avg_cos = (cos1 + cos2 + cos3) / 3.0
     avg_sqnr = (sqnr1 + sqnr2 + sqnr3) / 3.0
