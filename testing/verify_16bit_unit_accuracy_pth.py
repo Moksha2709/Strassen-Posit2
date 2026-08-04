@@ -11,11 +11,52 @@ import torch
 import numpy as np
 
 sys.path.append(os.path.abspath("../test8bit"))
+sys.path.append(os.path.abspath("."))
+
 from cifar_resnet_layer_extractor import get_cifar_resnet50_conv_layers
-from verify_16bit_resnet_cifar_accuracy import im2col_matrices
-from verify_16bit_unit_accuracy import (
-    compile_verilog_netlist, run_one_16x16_tile, compute_accuracy_metrics, matmul_fp32
+from verify_16bit_resnet_hardware import (
+    compile_verilog_netlist, run_one_16x16_tile, im2col_matrices
 )
+
+def matmul_fp32(A, B):
+    M = len(A)
+    K = len(A[0])
+    N = len(B[0])
+    C = [[0.0] * N for _ in range(M)]
+    for i in range(M):
+        for k in range(K):
+            a_val = A[i][k]
+            for j in range(N):
+                C[i][j] += a_val * B[k][j]
+    return C
+
+def compute_accuracy_metrics(pred_matrix, ref_matrix):
+    pred = np.array(pred_matrix, dtype=np.float32).flatten()
+    ref = np.array(ref_matrix, dtype=np.float32).flatten()
+
+    dot_product = np.dot(pred, ref)
+    norm_pred = np.linalg.norm(pred)
+    norm_ref = np.linalg.norm(ref)
+
+    if norm_pred == 0 or norm_ref == 0:
+        cosine_sim = 0.0
+    else:
+        cosine_sim = float(dot_product / (norm_pred * norm_ref))
+
+    mse = np.mean((pred - ref) ** 2)
+    rmse = float(np.sqrt(mse))
+
+    signal_power = np.mean(ref ** 2)
+    noise_power = mse
+
+    if noise_power == 0:
+        sqnr_db = 100.0
+    elif signal_power == 0:
+        sqnr_db = -100.0
+    else:
+        sqnr_db = float(10 * np.log10(signal_power / noise_power))
+
+    return cosine_sim, sqnr_db, rmse
 
 def main():
     print("=" * 80)
